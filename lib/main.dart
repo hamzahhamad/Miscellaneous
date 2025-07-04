@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:geolocator/geolocator.dart';
@@ -34,13 +35,15 @@ void main() async {
   await Hive.openBox<Location>('locations');
   await Hive.openBox('settings');
   
-  // Set system UI overlay style
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.light,
-    ),
-  );
+  // Set system UI overlay style (only for mobile)
+  if (!kIsWeb) {
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+      ),
+    );
+  }
   
   runApp(
     const ProviderScope(
@@ -63,11 +66,97 @@ class WeatherApp extends ConsumerWidget {
       theme: appTheme.lightTheme,
       darkTheme: appTheme.darkTheme,
       themeMode: themeMode,
-      home: const AppInitializer(),
+      home: kIsWeb ? const WebAppInitializer() : const AppInitializer(),
       routes: {
         '/home': (context) => const WeatherHomeScreen(),
         '/onboarding': (context) => const OnboardingScreen(),
       },
+    );
+  }
+}
+
+class WebAppInitializer extends ConsumerStatefulWidget {
+  const WebAppInitializer({super.key});
+
+  @override
+  ConsumerState<WebAppInitializer> createState() => _WebAppInitializerState();
+}
+
+class _WebAppInitializerState extends ConsumerState<WebAppInitializer> {
+  @override
+  void initState() {
+    super.initState();
+    _initializeWebApp();
+  }
+
+  Future<void> _initializeWebApp() async {
+    await Future.delayed(const Duration(seconds: 2)); // Simulate loading
+    
+    // Create demo location (San Francisco)
+    final demoLocation = const Location(
+      latitude: 37.7749,
+      longitude: -122.4194,
+      name: 'San Francisco',
+      country: 'United States',
+      state: 'California',
+    );
+    
+    // Load demo weather data
+    await ref.read(weatherProvider.notifier).fetchWeatherData(demoLocation);
+    
+    if (mounted) {
+      Navigator.of(context).pushReplacementNamed('/home');
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF74B9FF),
+              Color(0xFF0984E3),
+            ],
+          ),
+        ),
+        child: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.wb_sunny_outlined,
+                size: 80,
+                color: Colors.white,
+              ),
+              SizedBox(height: 24),
+              Text(
+                'Weather Forecast',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 16),
+              Text(
+                'Apple-inspired weather app',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 16,
+                ),
+              ),
+              SizedBox(height: 48),
+              CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -114,7 +203,7 @@ class _AppInitializerState extends ConsumerState<AppInitializer> {
         final location = ref.read(locationProvider);
         
         if (location != null) {
-          await ref.read(weatherProvider.notifier).fetchWeatherData(location);
+          await ref.read(weatherProvider.notifier).fetchWeatherData(location.currentLocation!);
         }
       }
       

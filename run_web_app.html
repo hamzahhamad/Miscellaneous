@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Forecast - Apple Style Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .phone-container {
+            width: 375px;
+            height: 812px;
+            background: #000;
+            border-radius: 40px;
+            padding: 8px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            border-radius: 32px;
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(135deg, #74B9FF 0%, #0984E3 100%);
+        }
+
+        .notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 154px;
+            height: 30px;
+            background: #000;
+            border-radius: 0 0 16px 16px;
+            z-index: 1000;
+        }
+
+        .status-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 44px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 999;
+        }
+
+        .app-content {
+            padding: 44px 0 0 0;
+            height: 100%;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 20px 20px;
+            color: white;
+        }
+
+        .location {
+            font-size: 20px;
+            font-weight: 400;
+            margin-bottom: 8px;
+            opacity: 0.9;
+        }
+
+        .date {
+            font-size: 16px;
+            opacity: 0.7;
+            margin-bottom: 40px;
+        }
+
+        .weather-icon {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .temperature {
+            font-size: 96px;
+            font-weight: 100;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .condition {
+            font-size: 24px;
+            font-weight: 500;
+            margin-bottom: 16px;
+        }
+
+        .feels-like {
+            font-size: 16px;
+            opacity: 0.8;
+            margin-bottom: 40px;
+        }
+
+        .quick-stats {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            margin: 0 20px 20px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-around;
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-item {
+            text-align: center;
+            color: white;
+        }
+
+        .stat-icon {
+            font-size: 20px;
+            margin-bottom: 4px;
+            opacity: 0.7;
+        }
+
+        .stat-value {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.7;
+        }
+
+        .forecast-card {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            margin: 0 16px 16px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .card-icon {
+            margin-right: 8px;
+            font-size: 20px;
+        }
+
+        .hourly-forecast {
+            display: flex;
+            overflow-x: auto;
+            gap: 12px;
+            padding-bottom: 10px;
+        }
+
+        .hourly-item {
+            flex-shrink: 0;
+            text-align: center;
+            color: white;
+            width: 60px;
+        }
+
+        .hourly-time {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-bottom: 8px;
+        }
+
+        .hourly-icon {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            font-size: 16px;
+        }
+
+        .hourly-temp {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .daily-forecast {
+            color: white;
+        }
+
+        .daily-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .daily-item:last-child {
+            border-bottom: none;
+        }
+
+        .daily-day {
+            width: 60px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .daily-icon {
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 16px;
+            font-size: 16px;
+        }
+
+        .daily-temps {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .temp-low {
+            opacity: 0.7;
+            font-size: 14px;
+        }
+
+        .temp-high {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .confidence-card {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            margin: 0 16px 16px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            color: white;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            margin: 16px 0 8px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: #4CAF50;
+            width: 95%;
+            border-radius: 2px;
+        }
+
+        .demo-note {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+            }
+            
+            .phone-container {
+                width: 100vw;
+                height: 100vh;
+                border-radius: 0;
+                padding: 0;
+                box-shadow: none;
+            }
+            
+            .phone-screen {
+                border-radius: 0;
+            }
+            
+            .notch {
+                display: none;
+            }
+            
+            .demo-note {
+                display: none;
+            }
+        }
+
+        .animate-in {
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="phone-container">
+        <div class="notch"></div>
+        <div class="phone-screen">
+            <div class="status-bar">
+                <span>9:41</span>
+                <span>🔋 100%</span>
+            </div>
+            
+            <div class="app-content">
+                <div class="header">
+                    <div class="location">San Francisco</div>
+                    <div class="date" id="current-date"></div>
+                    
+                    <div class="weather-icon">☀️</div>
+                    
+                    <div class="temperature">22°</div>
+                    <div class="condition">Sunny</div>
+                    <div class="feels-like">Feels like 24°</div>
+                </div>
+
+                <div class="quick-stats animate-in">
+                    <div class="stat-item">
+                        <div class="stat-icon">💧</div>
+                        <div class="stat-value">45%</div>
+                        <div class="stat-label">Humidity</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">💨</div>
+                        <div class="stat-value">12 km/h</div>
+                        <div class="stat-label">Wind</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">👁️</div>
+                        <div class="stat-value">10 km</div>
+                        <div class="stat-label">Visibility</div>
+                    </div>
+                </div>
+
+                <div class="forecast-card animate-in">
+                    <div class="card-header">
+                        <span class="card-icon">🕐</span>
+                        Hourly Forecast
+                    </div>
+                    <div class="hourly-forecast">
+                        <div class="hourly-item">
+                            <div class="hourly-time">Now</div>
+                            <div class="hourly-icon">☀️</div>
+                            <div class="hourly-temp">22°</div>
+                        </div>
+                        <div class="hourly-item">
+                            <div class="hourly-time">11:00</div>
+                            <div class="hourly-icon">☀️</div>
+                            <div class="hourly-temp">24°</div>
+                        </div>
+                        <div class="hourly-item">
+                            <div class="hourly-time">12:00</div>
+                            <div class="hourly-icon">🌤️</div>
+                            <div class="hourly-temp">26°</div>
+                        </div>
+                        <div class="hourly-item">
+                            <div class="hourly-time">13:00</div>
+                            <div class="hourly-icon">🌤️</div>
+                            <div class="hourly-temp">28°</div>
+                        </div>
+                        <div class="hourly-item">
+                            <div class="hourly-time">14:00</div>
+                            <div class="hourly-icon">☁️</div>
+                            <div class="hourly-temp">27°</div>
+                        </div>
+                        <div class="hourly-item">
+                            <div class="hourly-time">15:00</div>
+                            <div class="hourly-icon">🌦️</div>
+                            <div class="hourly-temp">25°</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="forecast-card animate-in">
+                    <div class="card-header">
+                        <span class="card-icon">📅</span>
+                        10-Day Forecast
+                    </div>
+                    <div class="daily-forecast">
+                        <div class="daily-item">
+                            <div class="daily-day">Today</div>
+                            <div class="daily-icon">☀️</div>
+                            <div class="daily-temps">
+                                <span class="temp-low">18°</span>
+                                <span class="temp-high">28°</span>
+                            </div>
+                        </div>
+                        <div class="daily-item">
+                            <div class="daily-day">Tue</div>
+                            <div class="daily-icon">🌤️</div>
+                            <div class="daily-temps">
+                                <span class="temp-low">19°</span>
+                                <span class="temp-high">26°</span>
+                            </div>
+                        </div>
+                        <div class="daily-item">
+                            <div class="daily-day">Wed</div>
+                            <div class="daily-icon">🌦️</div>
+                            <div class="daily-temps">
+                                <span class="temp-low">16°</span>
+                                <span class="temp-high">23°</span>
+                            </div>
+                        </div>
+                        <div class="daily-item">
+                            <div class="daily-day">Thu</div>
+                            <div class="daily-icon">⛈️</div>
+                            <div class="daily-temps">
+                                <span class="temp-low">15°</span>
+                                <span class="temp-high">21°</span>
+                            </div>
+                        </div>
+                        <div class="daily-item">
+                            <div class="daily-day">Fri</div>
+                            <div class="daily-icon">🌤️</div>
+                            <div class="daily-temps">
+                                <span class="temp-low">17°</span>
+                                <span class="temp-high">24°</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="confidence-card animate-in">
+                    <div class="card-header">
+                        <span class="card-icon">✅</span>
+                        Forecast Confidence
+                    </div>
+                    <div class="confidence-bar">
+                        <div class="confidence-fill"></div>
+                    </div>
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">95% confidence</div>
+                    <div style="font-size: 14px; opacity: 0.7; margin-bottom: 8px;">Sources: Open-Meteo, NOAA, MET Norway</div>
+                    <div style="font-size: 14px; opacity: 0.7;">Last updated: Just now</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="demo-note">
+        📱 Click and scroll to experience the Apple Weather-style interface
+    </div>
+
+    <script>
+        // Set current date
+        const now = new Date();
+        const options = { weekday: 'long', month: 'short', day: 'numeric' };
+        document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', options);
+
+        // Add scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all cards
+        document.querySelectorAll('.animate-in').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+            observer.observe(card);
+        });
+
+        // Simulate real-time updates
+        setInterval(() => {
+            const temps = ['22°', '23°', '21°', '24°'];
+            const temp = temps[Math.floor(Math.random() * temps.length)];
+            document.querySelector('.temperature').textContent = temp;
+        }, 5000);
+
+        // Add touch interactions
+        document.querySelector('.phone-screen').addEventListener('touchstart', (e) => {
+            e.target.style.transform = 'scale(0.98)';
+        });
+
+        document.querySelector('.phone-screen').addEventListener('touchend', (e) => {
+            e.target.style.transform = 'scale(1)';
+        });
+    </script>
+</body>
+</html>

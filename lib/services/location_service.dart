@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -212,10 +211,17 @@ class LocationService {
   }
 
   Future<void> openLocationSettings() async {
-    if (Platform.isAndroid) {
-      await Geolocator.openLocationSettings();
-    } else if (Platform.isIOS) {
+    // For web, we can't open system settings, so just show a message
+    if (kIsWeb) {
+      debugPrint('Location settings not available on web');
+      return;
+    }
+    
+    // For mobile platforms, this would open settings
+    try {
       await openAppSettings();
+    } catch (e) {
+      debugPrint('Error opening location settings: $e');
     }
   }
 
